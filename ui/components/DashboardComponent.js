@@ -400,7 +400,6 @@ class DashboardComponent extends React.Component {
     dataFetch(
       "/api/system/adapters",
       {
-        credentials : "same-origin",
         method : "GET",
         credentials : "include",
       },
@@ -569,7 +568,6 @@ class DashboardComponent extends React.Component {
     dataFetch(
       `/api/system/adapters?adapter=${encodeURIComponent(adapterLoc)}`,
       {
-        credentials : "same-origin",
         credentials : "include",
       },
       (result) => {
@@ -630,7 +628,6 @@ class DashboardComponent extends React.Component {
     dataFetch(
       "/api/system/kubernetes/ping?context=" + id,
       {
-        credentials : "same-origin",
         credentials : "include",
       },
       (result) => {
@@ -658,7 +655,6 @@ class DashboardComponent extends React.Component {
     dataFetch(
       "/api/telemetry/metrics/grafana/ping",
       {
-        credentials : "same-origin",
         credentials : "include",
       },
       (result) => {
@@ -908,7 +904,7 @@ class DashboardComponent extends React.Component {
                 }
               >
                 {self.state.meshScanNamespaces[mesh.name] &&
-                    self.state.meshScanNamespaces[mesh.name].map((ns) => <MenuItem value={ns}>{ns}</MenuItem>)}
+                    self.state.meshScanNamespaces[mesh.name].map((ns) => <MenuItem key={ns.uniqueID} value={ns}>{ns}</MenuItem>)}
               </Select>
             )}
           </>
@@ -1024,7 +1020,7 @@ class DashboardComponent extends React.Component {
                    self.setState({ selectedNamespace : e.target.value })
                  }
                >
-                 {self.state.namespaceList && self.state.namespaceList.map((ns) => <MenuItem value={ns}>{ns}</MenuItem>)}
+                 {self.state.namespaceList && self.state.namespaceList.map((ns) => <MenuItem key={ns.uniqueID} value={ns}>{ns}</MenuItem>)}
                </Select>
              )}
            </>
@@ -1063,7 +1059,6 @@ class DashboardComponent extends React.Component {
     dataFetch(
       "/api/telemetry/metrics/ping",
       {
-        credentials : "same-origin",
         credentials : "include",
       },
       (result) => {
@@ -1114,7 +1109,7 @@ class DashboardComponent extends React.Component {
     let chp = (
       <div>
         {k8sconfig?.map(ctx => (
-          <Tooltip title={`Server: ${ctx.server}`}>
+          <Tooltip key={ctx.uniqueID} title={`Server: ${ctx.server}`}>
             <Chip
               label={ctx?.name}
               className={classes.chip}
@@ -1132,7 +1127,7 @@ class DashboardComponent extends React.Component {
       chp = showConfigured;
     }
 
-    showConfigured = <div showConfigured>{chp}</div>;
+    showConfigured = <div>{chp}</div>;
 
     let showAdapters = "No adapters configured.";
     if (availableAdapters.length > 0) {

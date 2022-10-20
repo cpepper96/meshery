@@ -30,9 +30,29 @@ export const rjsfTheme = createTheme({
         "&:hover" : "00b39f"
       }
     },
-    MuiInput : {
+    MuiTextField : {
       root : {
-        width : '50%',
+        width : "calc(100% - 4px)",
+      }
+    },
+    MuiInputLabel : {
+      root : {
+        whiteSpace : "nowrap",
+        overflow : "hidden",
+        textOverflow : "ellipsis",
+        maxWidth : "70%",
+        height : "100%",
+        '&:hover' : {
+          overflow : "visible",
+        }
+      },
+      shrink : {
+        maxWidth : "100%",
+      }
+    },
+    MuiFormControl : {
+      root : {
+        marginTop : "0.3rem"
       }
     },
     MuiBox : {
@@ -54,7 +74,7 @@ export const rjsfTheme = createTheme({
     },
     MuiTypography : {
       body1 : {
-        fontSize : '0.8rem'
+        fontSize : '0.8rem',
       },
       h5 : {
         textTransform : 'capitalize',
@@ -134,12 +154,23 @@ export const rjsfTheme = createTheme({
         marginTop : '0.1rem !important',
         overflow : "hidden",
         textOverflow : "ellipsis",
-        whiteSpace : "nowrap",
         '&:hover' : {
           overflow : "visible",
-          whiteSpace : "normal",
+        },
+        // To scale the grid items
+        "& > *:nth-child(2)" : {
+          "& > *:nth-child(1)" : {
+            "& > *:nth-child(2)" : {
+              justifyContent : 'space-around'
+            }
+          },
         }
       },
+    },
+    MuiIconButton : {
+      root : {
+        cursor : "default"
+      }
     },
     MuiPaper : {
       elevation2 : {

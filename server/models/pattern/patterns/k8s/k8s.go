@@ -37,8 +37,8 @@ func createK8sResourceStructure(comp v1alpha1.Component) map[string]interface{} 
 		"kind":       kind,
 		"metadata": map[string]interface{}{
 			"name":        comp.ObjectMeta.Name,
-			"annotations": comp.Annotations,
-			"labels":      comp.Labels,
+			"annotations": comp.ObjectMeta.Annotations,
+			"labels":      comp.ObjectMeta.Labels,
 		},
 	}
 
@@ -127,7 +127,10 @@ func ConvertMapInterfaceMapString(v interface{}, prettify bool) interface{} {
 			x["type"] = "integer"
 		}
 	case string:
-		return man.FormatToReadableString(x)
+		if prettify {
+			return man.FormatToReadableString(x) //Whitespace formatting should be done at the time of prettification only
+		}
+		return strings.ReplaceAll(x, " ", "")
 	}
 
 	return v

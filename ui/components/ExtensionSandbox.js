@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { toggleDrawer } from "../lib/store";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
 import { CircularProgress, Typography } from "@material-ui/core";
 import normalizeURI from "../utils/normalizeURI";
 import dataFetch from "../lib/data-fetch";
@@ -24,7 +27,6 @@ export function getCapabilities(type, cb) {
   dataFetch(
     "/api/provider/capabilities",
     {
-      credentials : "same-origin",
       method : "GET",
       credentials : "include",
     },
@@ -51,7 +53,6 @@ export function getFullPageExtensions(cb) {
   dataFetch(
     "/api/provider/capabilities",
     {
-      credentials : "same-origin",
       method : "GET",
       credentials : "include",
     },
@@ -273,47 +274,64 @@ function createPathForRemoteComponent(componentName) {
  *  3. account - for user account
  * @param {{ type: "navigator" | "user_prefs" | "account", Extension: JSX.Element }} props
  */
-function ExtensionSandbox({ type, Extension }) {
-  const [extensions, setExtensions] = useState([]);
+function ExtensionSandbox({ type, Extension, isDrawerCollapsed, toggleDrawer }) {
+  const [extension, setExtension] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     getCapabilities(type, (data) => {
-      setExtensions(data);
+      setExtension(data);
       setIsLoading(false);
     });
-  }, []);
+    if (type === "navigator" && !isDrawerCollapsed) {
+      toggleDrawer({ isDrawerCollapsed : !isDrawerCollapsed });
+    }
+    // necessary to cleanup states on each unmount to prevent memory leaks and unwanted clashes between extension points
+    return () => {
+      setExtension([]);
+      setIsLoading(true);
+    }
+  }, [type]);
 
-  if (type === "navigator") {
-    return isLoading ?
-      <LoadingScreen animatedIcon="AnimatedMeshSync" message="Establishing Remote Connection" />
-      : (
-        <Extension url={createPathForRemoteComponent(getComponentURIFromPathForNavigator(extensions, getPath()))} />
-      );
-  }
-
-  if (type === "user_prefs") {
-    return isLoading
-      ? <Typography align="center">
-        <CircularProgress />
-      </Typography>
-      : (
-        getComponentURIFromPathForUserPrefs(extensions).map(uri => {
-          return <Extension url={createPathForRemoteComponent(uri)} />
-        })
-      );
-  }
-
-  if (type === "account") {
-    return isLoading ?
-      <LoadingScreen animatedIcon="AnimatedMeshSync" message="Establishing Remote Connection" />
-      :
-      (
-        <Extension url={createPathForRemoteComponent(getComponentURIFromPathForAccount(extensions, getPath()))} />
-      )
-  }
-
-  return null
+  return (
+    <>
+      {
+        (type === "navigator" && extension?.length !== 0)?
+          isLoading ?
+            <LoadingScreen animatedIcon="AnimatedMeshery" message="Establishing Remote Connection" />
+            : (
+              <Extension url={createPathForRemoteComponent(getComponentURIFromPathForNavigator(extension, getPath()))} />
+            )
+          : (type === "user_prefs" && extension?.length !== 0)?
+            isLoading?
+              <Typography align="center">
+                <CircularProgress />
+              </Typography>
+              : (
+                getComponentURIFromPathForUserPrefs(extension).map(uri => {
+                  return <Extension url={createPathForRemoteComponent(uri)} />
+                })
+              )
+            : (type === "account" && extension?.length !== 0)?
+              isLoading ?
+                <LoadingScreen animatedIcon="AnimatedMeshery" message="Establishing Remote Connection" />
+                :
+                (
+                  <Extension url={createPathForRemoteComponent(getComponentURIFromPathForAccount(extension, getPath()))} />
+                )
+              : null
+      }
+    </>
+  )
 }
 
-export default ExtensionSandbox;
+const mapDispatchToProps = (dispatch) => ({
+  toggleDrawer : bindActionCreators(toggleDrawer, dispatch),
+});
+
+const mapStateToProps = (state) => {
+  const isDrawerCollapsed = state.get("isDrawerCollapsed")
+  return { isDrawerCollapsed };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ExtensionSandbox);

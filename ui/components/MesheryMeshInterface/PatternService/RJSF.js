@@ -11,6 +11,7 @@ import MesheryArrayFieldTemplate from "./RJSFCustomComponents/ArrayFieldTemlate"
 import CustomInputField from "./RJSFCustomComponents/CustomInputField";
 import MesheryCustomObjFieldTemplate from "./RJSFCustomComponents/ObjectFieldTemplate";
 import _ from "lodash"
+import { CustomUpDownField } from './RJSFCustomComponents/CustomUpDownWidget';
 
 const Form = withTheme(MaterialUITheme);
 
@@ -50,6 +51,7 @@ function RJSF(props) {
 
   React.useEffect(() => {
     const rjsfSchema = getRefinedJsonSchema(jsonSchema, hideTitle, errorHandler)
+    // UI schema builds responsible for customizations in the RJSF fields shown to user
     const uiSchema = buildUiSchema(rjsfSchema)
     setSchema({ rjsfSchema, uiSchema })
   }, [jsonSchema]) // to reduce heavy lifting on every react render
@@ -127,7 +129,8 @@ function RJSFForm(props) {
         additionalMetaSchemas={[JS4]}
         uiSchema={schema.uiSchema}
         widgets={{
-          TextWidget : CustomInputField
+          TextWidget : CustomInputField,
+          UpDownWidget : CustomUpDownField
         }}
         liveValidate
         showErrorList={false}

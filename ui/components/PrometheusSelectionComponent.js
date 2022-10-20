@@ -124,7 +124,6 @@ class PrometheusSelectionComponent extends Component {
         this.props.updateProgress({ showProgress : true });
         const self = this;
         dataFetch('/api/telemetry/metrics/board_import', {
-          credentials : 'same-origin',
           method : 'POST',
           credentials : 'include',
           headers : { 'Content-Type' : 'application/json', },
@@ -183,8 +182,7 @@ class PrometheusSelectionComponent extends Component {
           }
           this.props.updateProgress({ showProgress : true });
           const self = this;
-          dataFetch(queryURL, { credentials : 'same-origin',
-            credentials : 'include', }, (result) => {
+          dataFetch(queryURL, { credentials : 'include', }, (result) => {
             this.props.updateProgress({ showProgress : false });
             if (typeof result !== 'undefined') {
               let tmpVarOpts = [];
@@ -328,7 +326,9 @@ class PrometheusSelectionComponent extends Component {
                     // if (ind === 0 || this.getSelectedTemplateVar(ind-1) !== ''){
                     if (ind === 0 || typeof this.getSelectedTemplateVar(ind - 1) !== 'undefined') {
                       return (
-                        <Grid item xs={12} sm={4}>
+
+                        <Grid item xs={12} sm={4} key={ind}>
+
                           <TextField
                             select
                             id={`template_var_${ind}`}

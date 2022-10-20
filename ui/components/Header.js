@@ -161,6 +161,17 @@ const styles = (theme) => ({
   }
 });
 
+const CONTROLLERS = {
+  BROKER : 0,
+  MESHSYNC : 1,
+}
+
+const STATUS = {
+  DISABLED : "Disabled",
+  NOT_CONNECTED : "Not Connected",
+  ACTIVE : "Active"
+}
+
 async function loadActiveK8sContexts() {
   try {
     const res = await promisifiedDataFetch("/api/system/sync")
@@ -202,29 +213,52 @@ function K8sContextMenu({
   const getOperatorStatus = (contextId) => {
     const state = runningStatus.operatorStatus;
     if (!state) {
-      return false;
+      return STATUS.DISABLED;
     }
 
     const context = state.find(st => st.contextID === contextId)
     if (!context) {
-      return false;
+      return STATUS.DISABLED;
     }
 
-    return context.operatorStatus.status === "ENABLED";
+    return context.operatorStatus.status === "ENABLED" ? STATUS.ACTIVE : STATUS.DISABLED;
   }
 
   const getMeshSyncStatus = (contextId) => {
-    const state = runningStatus.meshSyncStatus;
+    const state = runningStatus.operatorStatus;
     if (!state) {
-      return false;
+      return STATUS.DISABLED;
     }
 
     const context = state.find(st => st.contextID === contextId)
     if (!context) {
-      return false;
+      return STATUS.DISABLED;
     }
 
-    return context.OperatorControllerStatus.status?.includes("ENABLED");
+    const status = context.operatorStatus.controllers[CONTROLLERS.MESHSYNC]?.status
+    if (status?.includes("ENABLED")) {
+      return status.split(" ")[1].trim()
+    }
+    return status;
+  }
+
+  const getBrokerStatus = (contextId) => {
+    const state = runningStatus.operatorStatus;
+    if (!state) {
+      return STATUS.NOT_CONNECTED;
+    }
+
+    const context = state.find(st => st.contextID === contextId)
+    if (!context) {
+      return STATUS.NOT_CONNECTED;
+    }
+
+    const status = context.operatorStatus.controllers[CONTROLLERS.BROKER]?.status
+    if (status?.includes("CONNECTED")) {
+      return status.split(" ")[1].trim()
+    }
+
+    return STATUS.NOT_CONNECTED;
   }
 
   const handleKubernetesClick = (id) => {
@@ -238,11 +272,6 @@ function K8sContextMenu({
   }
 
   const handleKubernetesDelete = (name, ctxId) => () => {
-    if (contexts?.total_count === 1) {
-      alert("You have only one kubernetes context connected to Meshery, Aborting delete operation");
-      return;
-    }
-
     if (confirm(`Are you sure you want to delete "${name}" cluster from Meshery?`)) {
       const successCallback = async () => {
         const updatedConfig = await loadActiveK8sContexts()
@@ -354,18 +383,19 @@ function K8sContextMenu({
                 }
                 {contexts?.contexts?.map(ctx => {
                   const meshStatus = getMeshSyncStatus(ctx.id);
+                  const brokerStatus = getBrokerStatus(ctx.id);
                   const operStatus = getOperatorStatus(ctx.id);
 
                   function getStatus(status) {
                     if (status) {
-                      return "Active"
+                      return STATUS.ACTIVE
                     } else {
-                      return "InActive"
+                      return STATUS.DISABLED
                     }
                   }
 
-                  return <div id={ctx.id} className={classes.chip}>
-                    <Tooltip title={`Server: ${ctx.server}, Meshsync: ${getStatus(meshStatus)}, Operator: ${getStatus(operStatus)}`}>
+                  return <div id={ctx.id} className={classes.chip} key={ctx.uniqueID}>
+                    <Tooltip title={`Server: ${ctx.server},  Operator: ${getStatus(operStatus)}, MeshSync: ${getStatus(meshStatus)}, Broker: ${getStatus(brokerStatus)}`}>
                       <div style={{ display : "flex", justifyContent : "flex-start", alignItems : "center" }}>
                         <Checkbox
                           checked={activeContexts.includes(ctx.id)}
@@ -444,7 +474,6 @@ class Header extends React.Component {
     this._isMounted = false;
   }
 
-
   render() {
     const { classes, title, onDrawerToggle, onDrawerCollapse, isBeta } = this.props;
     return (
@@ -502,7 +531,7 @@ class Header extends React.Component {
                     <MesheryNotification />
                   </div>
                   <span className={classes.userSpan}>
-                    <User color="inherit" iconButtonClassName={classes.iconButtonAvatar} avatarClassName={classes.avatar} />
+                    <User color="inherit" iconButtonClassName={classes.iconButtonAvatar} avatarClassName={classes.avatar} updateExtensionType={this.props.updateExtensionType}/>
                   </span>
 
                 </Grid>
