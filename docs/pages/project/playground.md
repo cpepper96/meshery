@@ -49,5 +49,20 @@ _Creating your own account ensures that any designs you create or save will be s
 
 _To ensure accountability in the Playground, it's crucial to promote the use of individual named accounts. This helps prevent bad actors from hiding behind anonymous general-use accounts and maliciously abusing the Playground. Therefore, the use of named accounts is an essential step towards achieving this goal._
 
-### Question:Can I deploy the Meshery on-premises?
+### Question: Can I deploy the Meshery on-premises?
 **Answer:** _Yes, Meshery can be deployed on-premises with a single command to download, install, and run your own instance of Meshery in your environment. See all supported platforms to deploy your own Meshery instance at https://meshery.io_
+
+### Question: When I add my Kubernetes cluster to the Meshery Playground will it be available to all other users? Can other people access my cluster?
+**Answer:** _No, they can't, unless you explicitly allow them to do so. It's important to understand the following controls and system behavior:_
+
+_1. Ownership: Every connection to a Kubernetes cluster is created by and owned by the individual that provided the Kubernetes context. That individual may elect to share the connection with others on their team (if you have invited anyone to your team(s))._
+
+_2. Permission: If you do grant other team members access, you do so by creating an environment, assigning that Kubernetes connection to the environment, then creating a workspace and assigning that environment to the workspace. Users of any of your teams to which you have shared access to the workspace will then have permission to access the cluster._
+
+_3. Connectivity: those individuals will have to be afforded network connectivity to that cluster (in whatever fashion you deem appropriate). There are two ways in which this can occur:_
+
+_3.a) The other user runs their own copy of Meshery (or signs into a shared instance like the Playground) and will see the connection as being available when they sign in. Their Meshery Server will need to be able to reach your Kube API over the network. How that is done can be any number of ways and is left unto your own devices._
+
+_3.b) The other user signs into your Meshery Server instance, which has network access to your Kubernetes cluster. In order for the other user to sign into your Meshery Server, you would have to expose it to the Internet or VPN or… one of the many other ways to grant them access to your Meshery Server._
+
+_So, in short, you can share access to your Kubernetes cluster with other users, but you have to explicitly grant them access to do so. For more information please visit [Remote Provider Permissions](https://docs.meshery.io/extensibility/authorization)._
